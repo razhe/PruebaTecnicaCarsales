@@ -1,0 +1,136 @@
+<div class="episodes-container">
+  <!-- HEADER -->
+  <header class="episodes-header">
+    <h1>Episodios de Rick and Morty</h1>
+    <p class="subtitle">
+      Total de episodios: <strong>{{ pagination()?.count }}</strong>
+    </p>
+  </header>
+
+  <!-- FILTROS Y BÚSQUEDA -->
+  <section class="search-section">
+    <div class="search-filters">
+      <div class="filter-group">
+        <label for="searchName">Buscar por nombre:</label>
+        <input
+          id="searchName"
+          type="text"
+          placeholder="ej: Pilot, The Ricklantis..."
+          [ngModel]="searchName()"
+          (ngModelChange)="searchName.set($event)"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="searchEpisode">Buscar por código:</label>
+        <input
+          id="searchEpisode"
+          type="text"
+          placeholder="ej: S01E01, S02E03..."
+          [ngModel]="searchEpisode()"
+          (ngModelChange)="searchEpisode.set($event)"
+        />
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-search" (click)="search()">Buscar</button>
+        <button class="btn btn-clear" (click)="clearFilters()">Limpiar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTADO DE CARGA -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <p class="loading-text">Cargando episodios...</p>
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- MENSAJE DE ERROR -->
+  @if (errorMessage()) {
+    <div class="error-container">
+      <p class="error-text">{{ errorMessage() }}</p>
+    </div>
+  }
+
+  <!-- LISTA DE EPISODIOS -->
+  @if (!isLoading() && hasEpisodes()) {
+    <section class="episodes-list">
+      <div class="episodes-grid">
+        @for (episode of episodes(); track episode.id) {
+          <article class="episode-card">
+            <div class="episode-header">
+              <h3 class="episode-title">{{ episode.name }}</h3>
+              <span class="episode-code">{{ episode.episode }}</span>
+            </div>
+
+            <div class="episode-body">
+              <p class="episode-date">
+                <strong>Fecha de emisión:</strong> {{ episode.airDate }}
+              </p>
+              <p class="episode-characters">
+                <strong>Personajes:</strong> {{ episode.characters.length }}
+              </p>
+            </div>
+
+            <div class="episode-footer">
+              <small class="episode-created">
+                Creado: {{ episode.created | date: 'short' }}
+              </small>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- SIN RESULTADOS -->
+  @if (!isLoading() && !hasEpisodes() && !errorMessage()) {
+    <div class="no-results-container">
+      <p class="no-results-text">No se encontraron episodios</p>
+    </div>
+  }
+
+  <!-- PAGINACIÓN -->
+  @if (!isLoading() && hasEpisodes()) {
+    <footer class="pagination-section">
+      <div class="pagination-info">
+        <p>
+          Página <strong>{{ getCurrentPage() }}</strong> de
+          <strong>{{ getTotalPages() }}</strong>
+        </p>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          class="btn btn-pagination"
+          (click)="previousPage()"
+          [disabled]="!canGoToPrevious()"
+        >
+          ← Anterior
+        </button>
+
+        <div class="page-input-group">
+          <label for="pageInput">Ir a página:</label>
+          <input
+            id="pageInput"
+            type="number"
+            min="1"
+            [max]="getTotalPages()"
+            [value]="getCurrentPage()"
+            (change)="goToPage($event.target.valueAsNumber)"
+          />
+        </div>
+
+        <button
+          class="btn btn-pagination"
+          (click)="nextPage()"
+          [disabled]="!canGoToNext()"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </footer>
+  }
+</div>

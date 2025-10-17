@@ -1,0 +1,180 @@
+<div class="characters-container">
+  <!-- HEADER -->
+  <header class="characters-header">
+    <h1>Personajes de Rick and Morty</h1>
+    <p class="subtitle">
+      Total de personajes: <strong>{{ pagination()?.count }}</strong>
+    </p>
+  </header>
+
+  <!-- FILTROS Y BÚSQUEDA -->
+  <section class="search-section">
+    <div class="search-filters">
+      <div class="filter-group">
+        <label for="searchName">Nombre:</label>
+        <input
+          id="searchName"
+          type="text"
+          placeholder="ej: Rick, Morty..."
+          [ngModel]="searchName()"
+          (ngModelChange)="searchName.set($event)"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="searchStatus">Estado:</label>
+        <select
+          id="searchStatus"
+          [ngModel]="searchStatus()"
+          (ngModelChange)="searchStatus.set($event)"
+        >
+          <option value="">Todos</option>
+          @for (status of statusOptions; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="searchSpecies">Especie:</label>
+        <input
+          id="searchSpecies"
+          type="text"
+          placeholder="ej: Human, Alien..."
+          [ngModel]="searchSpecies()"
+          (ngModelChange)="searchSpecies.set($event)"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="searchType">Tipo:</label>
+        <input
+          id="searchType"
+          type="text"
+          placeholder="ej: Humanoid..."
+          [ngModel]="searchType()"
+          (ngModelChange)="searchType.set($event)"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="searchGender">Género:</label>
+        <select
+          id="searchGender"
+          [ngModel]="searchGender()"
+          (ngModelChange)="searchGender.set($event)"
+        >
+          <option value="">Todos</option>
+          @for (gender of genderOptions; track gender) {
+            <option [value]="gender">{{ gender }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-search" (click)="search()">Buscar</button>
+        <button class="btn btn-clear" (click)="clearFilters()">Limpiar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTADO DE CARGA -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <p class="loading-text">Cargando personajes...</p>
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- MENSAJE DE ERROR -->
+  @if (errorMessage()) {
+    <div class="error-container">
+      <p class="error-text">{{ errorMessage() }}</p>
+    </div>
+  }
+
+  <!-- GRID DE PERSONAJES -->
+  @if (!isLoading() && hasCharacters()) {
+    <section class="characters-list">
+      <div class="characters-grid">
+        @for (character of characters(); track character.id) {
+          <article class="character-card">
+            <div class="character-image">
+              <img [src]="character.image" [alt]="character.name" />
+            </div>
+
+            <div class="character-body">
+              <h3 class="character-name">{{ character.name }}</h3>
+
+              <div class="character-info">
+                <p>
+                  <strong>Estado:</strong>
+                  <span [class]="'status-' + character.status.toLowerCase()">
+                    {{ character.status }}
+                  </span>
+                </p>
+                <p><strong>Especie:</strong> {{ character.species }}</p>
+                @if (character.type) {
+                  <p><strong>Tipo:</strong> {{ character.type }}</p>
+                }
+                <p><strong>Género:</strong> {{ character.gender }}</p>
+                <p><strong>Origen:</strong> {{ character.origin.name }}</p>
+                <p><strong>Ubicación:</strong> {{ character.location.name }}</p>
+                <p><strong>Episodios:</strong> {{ character.episode.length }}</p>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- SIN RESULTADOS -->
+  @if (!isLoading() && !hasCharacters() && !errorMessage()) {
+    <div class="no-results-container">
+      <p class="no-results-text">No se encontraron personajes</p>
+    </div>
+  }
+
+  <!-- PAGINACIÓN -->
+  @if (!isLoading() && hasCharacters()) {
+    <footer class="pagination-section">
+      <div class="pagination-info">
+        <p>
+          Página <strong>{{ getCurrentPage() }}</strong> de
+          <strong>{{ getTotalPages() }}</strong>
+        </p>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          class="btn btn-pagination"
+          (click)="previousPage()"
+          [disabled]="!canGoToPrevious()"
+        >
+          ← Anterior
+        </button>
+
+        <div class="page-input-group">
+          <label for="pageInput">Ir a página:</label>
+          <input
+            id="pageInput"
+            type="number"
+            min="1"
+            [max]="getTotalPages()"
+            [value]="getCurrentPage()"
+            (change)="goToPage($event.target.valueAsNumber)"
+          />
+        </div>
+
+        <button
+          class="btn btn-pagination"
+          (click)="nextPage()"
+          [disabled]="!canGoToNext()"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </footer>
+  }
+</div>

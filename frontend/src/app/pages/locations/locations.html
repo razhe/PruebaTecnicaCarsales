@@ -1,0 +1,146 @@
+<div class="locations-container">
+  <!-- HEADER -->
+  <header class="locations-header">
+    <h1>Ubicaciones de Rick and Morty</h1>
+    <p class="subtitle">
+      Total de ubicaciones: <strong>{{ pagination()?.count }}</strong>
+    </p>
+  </header>
+
+  <!-- FILTROS Y BÚSQUEDA -->
+  <section class="search-section">
+    <div class="search-filters">
+      <div class="filter-group">
+        <label for="searchName">Nombre:</label>
+        <input
+          id="searchName"
+          type="text"
+          placeholder="ej: Earth, Citadel..."
+          [ngModel]="searchName()"
+          (ngModelChange)="searchName.set($event)"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="searchType">Tipo:</label>
+        <input
+          id="searchType"
+          type="text"
+          placeholder="ej: Planet, Space station..."
+          [ngModel]="searchType()"
+          (ngModelChange)="searchType.set($event)"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="searchDimension">Dimensión:</label>
+        <input
+          id="searchDimension"
+          type="text"
+          placeholder="ej: Dimension C-137..."
+          [ngModel]="searchDimension()"
+          (ngModelChange)="searchDimension.set($event)"
+        />
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-search" (click)="search()">Buscar</button>
+        <button class="btn btn-clear" (click)="clearFilters()">Limpiar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTADO DE CARGA -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <p class="loading-text">Cargando ubicaciones...</p>
+      <div class="spinner"></div>
+    </div>
+  }
+
+  <!-- MENSAJE DE ERROR -->
+  @if (errorMessage()) {
+    <div class="error-container">
+      <p class="error-text">{{ errorMessage() }}</p>
+    </div>
+  }
+
+  <!-- GRID DE UBICACIONES -->
+  @if (!isLoading() && hasLocations()) {
+    <section class="locations-list">
+      <div class="locations-grid">
+        @for (location of locations(); track location.id) {
+          <article class="location-card">
+            <div class="location-header">
+              <h3 class="location-name">{{ location.name }}</h3>
+              <span class="location-id">#{{ location.id }}</span>
+            </div>
+
+            <div class="location-body">
+              <div class="location-info">
+                <p><strong>Tipo:</strong> {{ location.type }}</p>
+                <p><strong>Dimensión:</strong> {{ location.dimension }}</p>
+                <p><strong>Residentes:</strong> {{ location.residents.length }}</p>
+              </div>
+
+              <div class="location-footer">
+                <small class="location-created">
+                  Creada: {{ location.created | date: 'short' }}
+                </small>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- SIN RESULTADOS -->
+  @if (!isLoading() && !hasLocations() && !errorMessage()) {
+    <div class="no-results-container">
+      <p class="no-results-text">No se encontraron ubicaciones</p>
+    </div>
+  }
+
+  <!-- PAGINACIÓN -->
+  @if (!isLoading() && hasLocations()) {
+    <footer class="pagination-section">
+      <div class="pagination-info">
+        <p>
+          Página <strong>{{ getCurrentPage() }}</strong> de
+          <strong>{{ getTotalPages() }}</strong>
+        </p>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          class="btn btn-pagination"
+          (click)="previousPage()"
+          [disabled]="!canGoToPrevious()"
+        >
+          ← Anterior
+        </button>
+
+        <div class="page-input-group">
+          <label for="pageInput">Ir a página:</label>
+          <input
+            id="pageInput"
+            type="number"
+            min="1"
+            [max]="getTotalPages()"
+            [value]="getCurrentPage()"
+            (change)="goToPage($event.target.valueAsNumber)"
+          />
+        </div>
+
+        <button
+          class="btn btn-pagination"
+          (click)="nextPage()"
+          [disabled]="!canGoToNext()"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </footer>
+  }
+</div>
